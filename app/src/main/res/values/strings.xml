@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">AI Timetable</string>
+    <string name="widget_description">Shows today\'s classes with current and upcoming classes highlighted</string>
+</resources>
