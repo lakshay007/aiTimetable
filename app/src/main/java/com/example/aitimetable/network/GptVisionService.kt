@@ -27,17 +27,17 @@ class GptVisionService(private val context: Context) {
         try {
             Log.d(TAG, "Starting image processing for URI: $imageUri")
             
-            // Convert URI to Bitmap
+    
             val bitmap = context.contentResolver.openInputStream(imageUri)?.use { input ->
                 android.graphics.BitmapFactory.decodeStream(input)
             } ?: throw Exception("Failed to decode image")
             
             Log.d(TAG, "Image decoded successfully. Size: ${bitmap.width}x${bitmap.height}")
             
-            // Scale down the image if needed
+           
             val scaledBitmap = scaleBitmap(bitmap)
             
-            // Create the prompt
+            
             val prompt = """
                 This is a timetable image. Please extract the schedule information and return it as a JSON object with the following structure:
                 {
@@ -67,7 +67,7 @@ class GptVisionService(private val context: Context) {
                 7. Make sure to extract all visible information from the image
             """.trimIndent()
 
-            // Generate content using Gemini
+         
             val response = generativeModel.generateContent(
                 content {
                     text(prompt)
@@ -78,7 +78,7 @@ class GptVisionService(private val context: Context) {
             val result = response.text?.trim() ?: throw Exception("Empty response from Gemini")
             Log.d(TAG, "Received response: $result")
 
-            // Try to find JSON in the content
+      
             val jsonStart = result.indexOf("{")
             val jsonEnd = result.lastIndexOf("}") + 1
 
@@ -90,7 +90,7 @@ class GptVisionService(private val context: Context) {
             val jsonString = result.substring(jsonStart, jsonEnd)
             Log.d(TAG, "Extracted JSON: $jsonString")
 
-            // Validate JSON structure
+         
             try {
                 JsonParser.parseString(jsonString)
                 Log.d(TAG, "JSON structure validated successfully")
