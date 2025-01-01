@@ -21,7 +21,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.aitimetable"
+        applicationId = "com.example.schedify"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

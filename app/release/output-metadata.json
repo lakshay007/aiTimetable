@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.example.aitimetable",
+  "applicationId": "com.example.schedify",
   "variantName": "release",
   "elements": [
     {

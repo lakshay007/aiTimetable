@@ -61,7 +61,7 @@ fun TimetableScreen(
         containerColor = DarkBackground,
         topBar = {
             TopAppBar(
-                title = { Text("AI Timetable") },
+                title = { Text("Schedify") },
                 actions = {
                     if (timetableData != null) {
                         IconButton(onClick = { 

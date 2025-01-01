@@ -1,6 +1,6 @@
-# AI Timetable
+# Schedify
 
-An Android app that uses Google's Gemini Vision API to automatically extract class schedules from timetable images.
+A smart Android app that uses Google's Gemini Vision API to automatically extract class schedules from timetable images.
 
 ## Features
 
