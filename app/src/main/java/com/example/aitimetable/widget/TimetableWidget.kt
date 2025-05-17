@@ -23,9 +23,9 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.FontWeight
 import android.content.Intent
 import android.util.Log
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import androidx.glance.LocalContext
+import androidx.glance.text.TextAlign
 import com.example.aitimetable.MainActivity
 import com.example.aitimetable.model.ClassEntry
 import com.example.aitimetable.model.TimetableData
@@ -80,65 +80,205 @@ private fun TimetableWidgetContent(classes: List<ClassEntry>) {
     val context = LocalContext.current
     val currentTime = LocalTime.now()
     
+    // Dark theme colors matching app
+    val darkBackground = Color(0xFF16161A)
+    val darkSurface = Color(0xFF242629)
+    val darkElevated = Color(0xFF2E2F33)
+    val darkTextPrimary = Color(0xFFECECEC)
+    val darkTextSecondary = Color(0xFF94A1B2)
+    val accentPurple = Color(0xFF7F5AF0)
+    val accentTeal = Color(0xFF2CB67D)
+    val accentYellow = Color(0xFFFFD166)
+    
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(ColorProvider(Color.White))
-            .cornerRadius(16.dp)
-            .padding(12.dp)
-            .clickable(actionStartActivity(Intent(context, MainActivity::class.java)))
+            .background(ColorProvider(darkBackground))
+            .cornerRadius(12.dp)
     ) {
-        Text(
-            text = "Today's Classes",
-            style = TextStyle(
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = ColorProvider(Color.Black)
-            )
-        )
-        
-        Spacer(GlanceModifier.height(8.dp))
-        
-        if (classes.isEmpty()) {
+        // Compact header
+        Row(
+            modifier = GlanceModifier
+                .fillMaxWidth()
+                .background(ColorProvider(accentPurple.copy(alpha = 0.2f)))
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+        ) {
             Text(
-                text = "No classes today",
+                text = "Schedify",
                 style = TextStyle(
-                    fontSize = 14.sp,
-                    color = ColorProvider(Color.Gray)
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = ColorProvider(darkTextPrimary)
                 )
             )
-        } else {
-            classes.forEach { classEntry ->
-                val isCurrentClass = isCurrentClass(classEntry, currentTime)
-                val isUpcoming = isUpcomingClass(classEntry, currentTime)
-                val textColor = when {
-                    isCurrentClass -> ColorProvider(Color.Blue)
-                    isUpcoming -> ColorProvider(Color.Black)
-                    else -> ColorProvider(Color.Gray)
-                }
-                
-                Row(
+            
+            Spacer(GlanceModifier.defaultWeight())
+            
+            Text(
+                text = LocalDate.now().format(DateTimeFormatter.ofPattern("EEE, MMM d")),
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    color = ColorProvider(darkTextSecondary)
+                )
+            )
+        }
+        
+        Spacer(GlanceModifier.height(4.dp))
+        
+        // Classes content
+        Column(
+            modifier = GlanceModifier
+                .fillMaxSize()
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .clickable(actionStartActivity(Intent(context, MainActivity::class.java)))
+        ) {
+            if (classes.isEmpty()) {
+                // Empty state
+                Column(
                     modifier = GlanceModifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp)
+                        .padding(vertical = 12.dp),
+                    verticalAlignment = Alignment.Vertical.CenterVertically,
+                    horizontalAlignment = Alignment.Horizontal.CenterHorizontally
                 ) {
                     Text(
-                        text = "${classEntry.startTime} - ${classEntry.endTime}",
+                        text = "No classes today",
                         style = TextStyle(
-                            fontSize = 12.sp,
-                            color = textColor
-                        ),
-                        modifier = GlanceModifier.defaultWeight()
+                            fontSize = 14.sp,
+                            textAlign = TextAlign.Center,
+                            color = ColorProvider(darkTextSecondary)
+                        )
                     )
-                    Text(
-                        text = classEntry.subject,
-                        style = TextStyle(
-                            fontSize = 12.sp,
-                            color = textColor,
-                            fontWeight = if (isCurrentClass) FontWeight.Bold else FontWeight.Normal
-                        ),
-                        modifier = GlanceModifier.defaultWeight()
-                    )
+                }
+            } else {
+                // Show classes in a more compact way
+                // Determine if we have too many classes to display
+                val displayedClasses = if (classes.size > 5) classes.take(4) else classes
+                val hasMore = classes.size > displayedClasses.size
+                
+                displayedClasses.forEachIndexed { index, classEntry ->
+                    val isCurrentClass = isCurrentClass(classEntry, currentTime)
+                    val isUpcoming = isUpcomingClass(classEntry, currentTime)
+                    
+                    val statusColor = when {
+                        isCurrentClass -> accentTeal
+                        isUpcoming -> accentYellow
+                        else -> darkTextSecondary
+                    }
+                    
+                    val backgroundColor = when {
+                        isCurrentClass -> darkElevated.copy(alpha = 0.8f)
+                        else -> darkSurface.copy(alpha = 0.6f)
+                    }
+                    
+                    // More compact class card
+                    Column(
+                        modifier = GlanceModifier
+                            .fillMaxWidth()
+                            .background(ColorProvider(backgroundColor))
+                            .cornerRadius(8.dp)
+                            .padding(8.dp)
+                    ) {
+                        // Class title and time in a more compact layout
+                        Row(
+                            modifier = GlanceModifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.Vertical.CenterVertically
+                        ) {
+                            // Colored dot indicator
+                            Box(
+                                modifier = GlanceModifier
+                                    .size(6.dp)
+                                    .cornerRadius(3.dp)
+                                    .background(ColorProvider(statusColor))
+                            ) {}
+                            
+                            Spacer(GlanceModifier.width(6.dp))
+                            
+                            // Subject with time on same line
+                            Column(
+                                modifier = GlanceModifier.defaultWeight()
+                            ) {
+                                // Subject name
+                                Text(
+                                    text = classEntry.subject,
+                                    style = TextStyle(
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = ColorProvider(darkTextPrimary)
+                                    ),
+                                    maxLines = 1
+                                )
+                                
+                                // Combined time and room info
+                                Row(
+                                    verticalAlignment = Alignment.Vertical.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "${classEntry.startTime}-${classEntry.endTime}",
+                                        style = TextStyle(
+                                            fontSize = 11.sp,
+                                            color = ColorProvider(statusColor)
+                                        )
+                                    )
+                                    
+                                    // Only show room if available
+                                    classEntry.room?.let { room ->
+                                        Spacer(GlanceModifier.width(4.dp))
+                                        Text(
+                                            text = "• $room",
+                                            style = TextStyle(
+                                                fontSize = 11.sp,
+                                                color = ColorProvider(darkTextSecondary)
+                                            ),
+                                            maxLines = 1
+                                        )
+                                    }
+                                }
+                            }
+                            
+                            // Status indicator for current class (even more compact)
+                            if (isCurrentClass) {
+                                Box(
+                                    modifier = GlanceModifier
+                                        .background(ColorProvider(accentTeal.copy(alpha = 0.2f)))
+                                        .cornerRadius(4.dp)
+                                        .padding(horizontal = 4.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = "Now",
+                                        style = TextStyle(
+                                            fontSize = 9.sp,
+                                            color = ColorProvider(accentTeal)
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Reduced spacing between class cards
+                    if (index < displayedClasses.size - 1) {
+                        Spacer(GlanceModifier.height(4.dp))
+                    }
+                }
+                
+                // Show "more" indicator if we couldn't display all classes
+                if (hasMore) {
+                    Spacer(GlanceModifier.height(4.dp))
+                    Row(
+                        modifier = GlanceModifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        horizontalAlignment = Alignment.Horizontal.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "+ ${classes.size - displayedClasses.size} more classes",
+                            style = TextStyle(
+                                fontSize = 11.sp,
+                                color = ColorProvider(accentPurple)
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -176,8 +316,9 @@ private fun parseTime(timeStr: String): LocalTime {
 
 private fun isCurrentClass(classEntry: ClassEntry, currentTime: LocalTime): Boolean {
     return try {
-        val startTime = parseTime(classEntry.startTime)
-        val endTime = parseTime(classEntry.endTime)
+        val formatter = DateTimeFormatter.ofPattern("HH:mm")
+        val startTime = LocalTime.parse(classEntry.startTime, formatter)
+        val endTime = LocalTime.parse(classEntry.endTime, formatter)
         startTime.toSecondOfDay() <= currentTime.toSecondOfDay() && currentTime.toSecondOfDay() <= endTime.toSecondOfDay()
     } catch (e: Exception) {
         Log.e("TimetableWidget", "Error parsing time for current class check", e)
@@ -187,7 +328,8 @@ private fun isCurrentClass(classEntry: ClassEntry, currentTime: LocalTime): Bool
 
 private fun isUpcomingClass(classEntry: ClassEntry, currentTime: LocalTime): Boolean {
     return try {
-        val startTime = parseTime(classEntry.startTime)
+        val formatter = DateTimeFormatter.ofPattern("HH:mm")
+        val startTime = LocalTime.parse(classEntry.startTime, formatter)
         currentTime.toSecondOfDay() < startTime.toSecondOfDay()
     } catch (e: Exception) {
         Log.e("TimetableWidget", "Error parsing time for upcoming class check", e)

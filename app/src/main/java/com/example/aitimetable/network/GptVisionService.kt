@@ -19,7 +19,7 @@ class GptVisionService(private val context: Context) {
     private val gson = Gson()
 
     private val generativeModel = GenerativeModel(
-        modelName = "gemini-1.5-flash",
+        modelName = "gemini-2.0-flash",
         apiKey = BuildConfig.GEMINI_API_KEY
     )
     

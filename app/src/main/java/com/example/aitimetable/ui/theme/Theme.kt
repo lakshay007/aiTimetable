@@ -23,12 +23,15 @@ private val DarkColorScheme = darkColorScheme(
     background = DarkBackground,
     surface = DarkSurface,
     error = DarkError,
-    onPrimary = Color.Black,
+    onPrimary = Color.White,
     onSecondary = Color.Black,
     onTertiary = Color.Black,
-    onBackground = Color.White,
-    onSurface = Color.White,
-    onError = Color.Black
+    onBackground = DarkTextPrimary,
+    onSurface = DarkTextPrimary,
+    onError = Color.White,
+    surfaceVariant = DarkElevated,
+    onSurfaceVariant = DarkTextSecondary,
+    outline = DarkBorder
 )
 
 @Composable
@@ -44,6 +47,9 @@ fun AiTimetableTheme(
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.background.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+            
+            // Optional: Make navigation bar match the background color
+            window.navigationBarColor = colorScheme.background.toArgb()
         }
     }
 
